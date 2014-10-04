@@ -6,6 +6,7 @@ class Field
   ENDLINE = "------------                 ------------"
   KEEPER  = '======='
   BALL  = 'o'
+  HEIGHT = 30
 
   attr_accessor :ball, :opponent_keeper, :my_keeper
 
@@ -13,7 +14,7 @@ class Field
     @ball = {x: 20, y: 15}
     @opponent_keeper = { pos: 17 }
     @my_keeper = { pos: 17 }
-    32.times {printf "\n" }
+    (HEIGHT + 2).times {printf "\n" }
   end
 
   def set_pos(json)
@@ -23,21 +24,22 @@ class Field
   end
 
   def flush
-    printf "\e[34A"
-    printf "\n"
-    printf "\n"
-    printf ENDLINE + "\n"
-    printf keeper_line(@opponent_keeper) + "\n"
-    (2..28).each do |y|
+    Curses.setpos(-32 , 0)
+    Curses.addstr "\n"
+    Curses.addstr "\n"
+    Curses.addstr ENDLINE + "\n"
+    Curses.addstr keeper_line(@opponent_keeper) + "\n"
+    (2..(HEIGHT - 2)).each do |y|
       if y == @ball[:y]
-        printf ball_line + "\n"
+        Curses.addstr ball_line + "\n"
       else
-        printf "|                                       |" + "\n"
+        Curses.addstr "|                                       |" + "\n"
       end
     end
-    printf keeper_line(@my_keeper) + "\n"
-    printf ENDLINE + "\n"
-    printf "\n"
+    Curses.addstr keeper_line(@my_keeper) + "\n"
+    Curses.addstr ENDLINE + "\n"
+    Curses.addstr "\n"
+    Curses.refresh
   end
 
   private
