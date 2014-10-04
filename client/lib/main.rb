@@ -1,4 +1,4 @@
-class Client
+class Main
 
   def initialize
     @field = Field.new    
@@ -12,4 +12,3 @@ class Client
   end
 
 end
-
