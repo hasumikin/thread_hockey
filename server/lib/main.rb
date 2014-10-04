@@ -24,7 +24,8 @@ class Main
         p2 = JSON.parse(sock2.gets)
         field.update(p1, p2)
         sock1.puts field.to_json
-        sock1.puts field.reverse.to_json
+        sock2.puts field.to_json
+        #sock2.puts field.reverse.to_json
       end
     end
   end
