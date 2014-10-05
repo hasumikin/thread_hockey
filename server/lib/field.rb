@@ -13,7 +13,8 @@ class Field < BaseField
 
   def update(p1, p2)
     act_ball
-    act_keeper(p1['key'])
+    act_keeper_p1(p1['key'])
+    act_keeper_p2(p2['key'])
   end
 
   def to_json
@@ -47,13 +48,20 @@ class Field < BaseField
     @ball = moved
   end
 
-  def act_keeper(act)
+  def act_keeper_p1(act)
     case act
     when 'r'
       @p1_keeper[:pos] += 1
     when 'l'
       @p1_keeper[:pos] += -1
     end
-
+  end
+  def act_keeper_p2(act)
+    case act
+    when 'r'
+      @p2_keeper[:pos] += 1
+    when 'l'
+      @p2_keeper[:pos] += -1
+    end
   end
 end
