@@ -1,30 +1,26 @@
 require 'json'
+require_relative '../../common_config/base_field'
 
-class Field
-  attr_accessor :ball, :opponent_keeper, :my_keeper
-  ENDLINE = "------------                 ------------"
-  KEEPER  = '======='
-  BALL  = 'o'
-  HEIGHT = 30
+class Field < BaseField
+  attr_accessor :ball, :p2_keeper, :p1_keeper
 
   def initialize
     @ball = {x: 10, y: 10}
-    @opponent_keeper = { pos: 17 }
-    @my_keeper = { pos: 17 }
+    @p2_keeper = { pos: 17 }
+    @p1_keeper = { pos: 17 }
     @ball_vector = first_vector
   end
 
-  def update(mine, opponent)
+  def update(p1, p2)
     act_ball
-    act_keeper(mine[:key])
-
+    act_keeper(p1['key'])
   end
 
   def to_json
     {
       ball: @ball,
-      my_keeper: @my_keeper,
-      opponent_keeper: @opponent_keeper
+      p1_keeper: @p1_keeper,
+      p2_keeper: @p2_keeper
     }.to_json
   end
 
@@ -54,9 +50,9 @@ class Field
   def act_keeper(act)
     case act
     when 'r'
-      @my_keeper[:pos] += 1
+      @p1_keeper[:pos] += 1
     when 'l'
-      @my_keeper[:pos] += -1
+      @p1_keeper[:pos] += -1
     end
 
   end

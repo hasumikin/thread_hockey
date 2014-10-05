@@ -1,13 +1,15 @@
 require 'json'
-require 'io/console'
 require 'curses'
+require 'timeout'
+require 'pry'
 
 class Main
 
   def initialize(host='localhost')
-    Curses.init_screen 
-    Curses.crmode
-    @field = Field.new    
+    Curses.init_screen
+    Curses.cbreak
+    Curses.noecho
+    @field = Field.new
     @sock = TCPSocket.open(host, 12345)
     flush
     game
@@ -17,23 +19,25 @@ class Main
 
   def game
     loop do
-      sleep 1
-      input = IO.select([STDIN], [], [], 0)
-      if input
-        ch = Curses.getch
-        request = case ch
-        when 'n'
-          "{'key':'l'}"
-        when 'm'
-          "{'key':'r'}"
-        else
-          "{}"
+      request = "{}"
+      begin
+        timeout(0.5) do
+          input = Curses.getch
+          request = case input
+          when 'n'
+            "{\"key\":\"l\"}"
+          when 'm'
+            "{\"key\":\"r\"}"
+          else
+            '{}'
+          end
+          Curses.getstr
+          sleep
         end
-      else
-        next
+      rescue => e
+        @sock.puts request
+        flush
       end
-      @sock.puts request
-      flush
     end
   end
 
