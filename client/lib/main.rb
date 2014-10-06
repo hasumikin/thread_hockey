@@ -1,6 +1,5 @@
 require 'json'
 require 'curses'
-require 'timeout'
 require 'pry'
 
 class Main
@@ -9,6 +8,7 @@ class Main
     Curses.init_screen
     Curses.cbreak
     Curses.noecho
+    Curses.timeout = 0
     @field = Field.new
     @sock = TCPSocket.open(host, 12345)
     flush
@@ -19,25 +19,18 @@ class Main
 
   def game
     loop do
-      request = "{}"
-      begin
-        timeout(0.5) do
-          input = Curses.getch
-          request = case input
-          when 'n'
-            "{\"key\":\"l\"}"
-          when 'm'
-            "{\"key\":\"r\"}"
-          else
-            '{}'
-          end
-          Curses.getstr
-          sleep
-        end
-      rescue => e
-        @sock.puts request
-        flush
+      input = Curses.getstr
+      request = case input[0]
+      when 'n'
+        "{\"key\":\"l\"}"
+      when 'm'
+        "{\"key\":\"r\"}"
+      else
+        '{}'
       end
+      @sock.puts request
+      flush
+      sleep 0.5
     end
   end
 
