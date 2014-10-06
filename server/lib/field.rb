@@ -20,25 +20,19 @@ class Field < BaseField
   def update(p1, p2)
     set_pos(p1, p2)
     move
-     # act_ball
-     # act_keeper_p1(p1['key'])
-     # act_keeper_p2(p2['key'])
+    show
+    #  act_ball
+    # act_keeper_p1(p1['key'])
+    #  act_keeper_p2(p2['key'])
   end
 
   def reverse
-    puts "reverse"
+    puts "reverse  " + "-"*20
     reverse_move
-    now = {
-      ball: @ball,
-      p1_keeper: @p1_keeper,
-      p2_keeper: @p2_keeper
-    }
-    puts now
-    puts "reverse_end"
+    show
   end
 
   def to_json
-    puts "JSON"
     {
       ball: @ball,
       p1_keeper: @p1_keeper,
@@ -47,6 +41,18 @@ class Field < BaseField
   end
 
   private
+
+  def show
+    puts "show"
+    now = {
+      ball: @ball,
+      p1_keeper: @p1_keeper,
+      p2_keeper: @p2_keeper
+    }
+    puts now
+    puts "move: #{@move}"
+  end
+
 
   def set_pos(p1, p2)
     ball = ball_pos
@@ -64,10 +70,10 @@ class Field < BaseField
   end
 
   def reverse_move
-    @ball[:x] -= @move[:ball][:x]
-    @ball[:y] -= @move[:ball][:y]
-    @p1_keeper[:pos] -= @move[:p1_keeper]
-    @p2_keeper[:pos] -= @move[:p2_keeper]
+    @ball[:x] -= @move[:ball][:x]*2
+    @ball[:y] -= @move[:ball][:y]*2
+    @p1_keeper[:pos] -= @move[:p1_keeper]*2
+    @p2_keeper[:pos] -= @move[:p2_keeper]*2
   end
 
   def inner?(x, y)

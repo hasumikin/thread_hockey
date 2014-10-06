@@ -30,6 +30,8 @@ class Main
         field.update(JSON.parse(p1), JSON.parse(p2))
         sock1.puts field.to_json
         sock2.puts field.reverse.to_json
+
+        #sock2.puts field.reverse.to_json
       end
     end
   end
