@@ -19,9 +19,10 @@ class Main
 
   def game
     loop do
-      request = "{}"
-      begin
-        timeout(0.5) do
+      # request = "{}"
+      # begin
+      #   timeout(1) do
+          Curses.timeout = 500
           input = Curses.getch
           request = case input
           when 'n'
@@ -31,13 +32,14 @@ class Main
           else
             '{}'
           end
+          Curses.timeout = 0
           Curses.getstr
-          sleep
-        end
-      rescue => e
+      #     sleep
+      #   end
+      # rescue => e
         @sock.puts request
         flush
-      end
+      # end
     end
   end
 
