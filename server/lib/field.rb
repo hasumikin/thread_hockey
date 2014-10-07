@@ -18,18 +18,15 @@ class Field < BaseField
   end
 
   def update(p1, p2)
-    set_pos(p1, p2)
-    move
-    show
-    #  act_ball
-    # act_keeper_p1(p1['key'])
-    #  act_keeper_p2(p2['key'])
+    reset_pos
+    set_move(p1, p2)
+    move_pos
   end
 
   def reverse
-    puts "reverse  " + "-"*20
-    reverse_move
-    show
+    reset_pos
+    move_pos_reverse
+    self
   end
 
   def to_json
@@ -42,38 +39,34 @@ class Field < BaseField
 
   private
 
-  def show
-    puts "show"
-    now = {
-      ball: @ball,
-      p1_keeper: @p1_keeper,
-      p2_keeper: @p2_keeper
-    }
-    puts now
-    puts "move: #{@move}"
+  def reset_pos
+    init_instance = self.class.new
+    @ball[:x] = init_instance.ball[:x]
+    @ball[:y] = init_instance.ball[:y]
+    @p1_keeper = init_instance.p1_keeper
+    @p2_keeper = init_instance.p2_keeper
   end
 
-
-  def set_pos(p1, p2)
-    ball = ball_pos
+  def set_move(p1, p2)
+    ball = ball_move
     @move[:ball][:x] += ball[0]
     @move[:ball][:y] += ball[1]
-    @move[:p1_keeper] += keeper_pos(p1["key"])
-    @move[:p2_keeper] += keeper_pos(p2["key"])
+    @move[:p1_keeper] += keeper_move(p1["key"])
+    @move[:p2_keeper] += keeper_move(p2["key"])
   end
 
-  def move
+  def move_pos
     @ball[:x] += @move[:ball][:x]
     @ball[:y] += @move[:ball][:y]
     @p1_keeper[:pos] += @move[:p1_keeper]
     @p2_keeper[:pos] += @move[:p2_keeper]
   end
 
-  def reverse_move
-    @ball[:x] -= @move[:ball][:x]*2
-    @ball[:y] -= @move[:ball][:y]*2
-    @p1_keeper[:pos] -= @move[:p1_keeper]*2
-    @p2_keeper[:pos] -= @move[:p2_keeper]*2
+  def move_pos_reverse
+    @ball[:x] -= @move[:ball][:x]
+    @ball[:y] -= @move[:ball][:y]
+    @p1_keeper[:pos] -= @move[:p2_keeper]
+    @p2_keeper[:pos] -= @move[:p1_keeper]
   end
 
   def inner?(x, y)
@@ -89,15 +82,15 @@ class Field < BaseField
     vectors[rand(4)]
   end
 
-  def ball_pos
+  def ball_move
     move = [0, 0]
-    moved_x = @ball[:x] + @move[:ball][:x]
-    moved_y = @ball[:y] + @move[:ball][:y]
+    moved_x = @ball[:x] + @move[:ball][:x] + @ball_vector[0]
+    moved_y = @ball[:y] + @move[:ball][:y] + @ball_vector[1]
     return move unless inner?(moved_x, moved_y)
     [@ball_vector[0], @ball_vector[1]]
   end
 
-  def keeper_pos(act)
+  def keeper_move(act)
     case act
     when 'r'
       1
@@ -107,30 +100,5 @@ class Field < BaseField
       0
     end
   end
-=begin
-  def act_ball
-    moved = @ball.dup
-    moved[:x] += @ball_vector[0]
-    moved[:y] += @ball_vector[1]
-    return unless inner?(moved[:x], moved[:y])
-    @ball = moved
-  end
 
-  def act_keeper_p1(act)
-    case act
-    when 'r'
-      @p1_keeper[:pos] += 1
-    when 'l'
-      @p1_keeper[:pos] += -1
-    end
-  end
-  def act_keeper_p2(act)
-    case act
-    when 'r'
-      @p2_keeper[:pos] += 1
-    when 'l'
-      @p2_keeper[:pos] += -1
-    end
-  end
-=end
 end
