@@ -20,7 +20,7 @@ class Field < BaseField
     Curses.setpos(2 , 0)
     Curses.addstr "\n"
     Curses.addstr "\n"
-    Curses.addstr ENDLINE + "\n"
+    Curses.addstr TOPLINE + "\n"
     Curses.addstr keeper_line(@p2_keeper, @ball[:y]==1) + "\n"
     (2..(HEIGHT - 2)).each do |y|
       if y == @ball[:y]

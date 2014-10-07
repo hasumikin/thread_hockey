@@ -4,6 +4,8 @@ require_relative '../../common_config/base_field'
 class Field < BaseField
   attr_accessor :ball, :p2_keeper, :p1_keeper
 
+  KEEPER_MAX_POS = WIDTH - KEEPER.size - 1
+
   def initialize
     @ball = {x: 10, y: 10}
     @p2_keeper = { pos: 17 }
@@ -60,17 +62,17 @@ class Field < BaseField
   def act_keeper_p1(act)
     case act
     when 'r'
-      @p1_keeper[:pos] += 1
+      @p1_keeper[:pos] += 1 if @p1_keeper[:pos] < KEEPER_MAX_POS
     when 'l'
-      @p1_keeper[:pos] += -1
+      @p1_keeper[:pos] += -1 if @p1_keeper[:pos] > 1
     end
   end
   def act_keeper_p2(act)
     case act
     when 'r'
-      @p2_keeper[:pos] += 1
+      @p2_keeper[:pos] += -1 if @p2_keeper[:pos] > 1
     when 'l'
-      @p2_keeper[:pos] += -1
+      @p2_keeper[:pos] += 1 if @p2_keeper[:pos] < KEEPER_MAX_POS
     end
   end
 end
