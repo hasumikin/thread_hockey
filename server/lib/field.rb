@@ -5,6 +5,8 @@ require_relative '../../common_config/base_field'
 class Field < BaseField
   attr_accessor :ball, :p2_keeper, :p1_keeper
 
+  KEEPER_MAX_POS = WIDTH - KEEPER.size - 1
+
   def initialize
     @ball = {x: 20, y: 15}
     @p2_keeper = { pos: 17 }
@@ -48,11 +50,9 @@ class Field < BaseField
   end
 
   def set_move(p1, p2)
-    ball = ball_move
-    @move[:ball][:x] += ball[0]
-    @move[:ball][:y] += ball[1]
-    @move[:p1_keeper] += keeper_move(p1["key"])
-    @move[:p2_keeper] += keeper_move(p2["key"])
+    act_ball
+    act_p1_keeper(p1["key"])
+    act_p2_keeper(p2["key"])
   end
 
   def move_pos
@@ -70,7 +70,7 @@ class Field < BaseField
   end
 
   def inner?(x, y)
-    x.between?(1, ENDLINE.length) && y.between?(0, HEIGHT)
+    x.between?(1, WIDTH - 1) && y.between?(1, HEIGHT - 1)
   end
 
   def first_vector
@@ -82,22 +82,39 @@ class Field < BaseField
     vectors[rand(4)]
   end
 
-  def ball_move
-    move = [0, 0]
-    moved_x = @ball[:x] + @move[:ball][:x] + @ball_vector[0]
-    moved_y = @ball[:y] + @move[:ball][:y] + @ball_vector[1]
-    return move unless inner?(moved_x, moved_y)
-    [@ball_vector[0], @ball_vector[1]]
+  def act_ball
+    move = {x: @ball_vector[0], y: @ball_vector[1]}
+    moved_x = (@ball[:x] + @move[:ball][:x]) + @ball_vector[0]
+    moved_y = (@ball[:y] + @move[:ball][:y]) + @ball_vector[1]
+    if moved_x == 0 || moved_x == WIDTH - 1
+      @ball_vector[0] = @ball_vector[0] * (-1)
+      move[:x] += @ball_vector[0] * 2
+    end
+    if moved_y == 0 || moved_y == HEIGHT
+      @ball_vector[1] = @ball_vector[1] * (-1)
+      move[:y] += @ball_vector[1] * 2
+    end
+    @move[:ball][:x] += move[:x]
+    @move[:ball][:y] += move[:y]
   end
 
-  def keeper_move(act)
+  def act_p1_keeper(act)
+    keeper_pos = @p1_keeper[:pos] + @move[:p1_keeper]
     case act
     when 'r'
-      1
+      @move[:p1_keeper] += 1 if keeper_pos < KEEPER_MAX_POS
     when 'l'
-      -1
-    else
-      0
+      @move[:p1_keeper] += -1 if keeper_pos > 1
+    end
+  end
+
+  def act_p2_keeper(act)
+    keeper_pos = @p2_keeper[:pos] + @move[:p2_keeper]
+    case act
+    when 'r'
+      @move[:p2_keeper] += -1 if keeper_pos > 1
+    when 'l'
+      @move[:p2_keeper] += 1 if keeper_pos < KEEPER_MAX_POS
     end
   end
 
