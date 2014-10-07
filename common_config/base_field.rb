@@ -5,4 +5,5 @@ class BaseField
   KEEPER  = '======='
   BALL  = 'o'
   HEIGHT = 30
+  WIDTH = ENDLINE.length
 end

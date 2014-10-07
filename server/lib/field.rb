@@ -28,7 +28,7 @@ class Field < BaseField
   private
 
   def inner?(x, y)
-    x.between?(1, ENDLINE.length) && y.between?(0, HEIGHT)
+    x.between?(1, WIDTH - 1) && y.between?(1, HEIGHT - 1)
   end
 
   def first_vector
@@ -44,8 +44,17 @@ class Field < BaseField
     moved = @ball.dup
     moved[:x] += @ball_vector[0]
     moved[:y] += @ball_vector[1]
-    return unless inner?(moved[:x], moved[:y])
-    @ball = moved
+    # if inner?(moved[:x], moved[:y])
+      if moved[:x] == 0 || moved[:x] == WIDTH - 1
+        @ball_vector[0] = @ball_vector[0] * (-1)
+        moved[:x] += @ball_vector[0] * 2
+      end
+      if moved[:y] == 0 || moved[:y] == HEIGHT
+        @ball_vector[1] = @ball_vector[1] * (-1)
+        moved[:y] += @ball_vector[1] * 2
+      end
+      @ball = moved
+    # end
   end
 
   def act_keeper_p1(act)
