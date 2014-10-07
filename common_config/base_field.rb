@@ -1,6 +1,7 @@
 class BaseField
             #01234567890123456789=12345678901234567890\n#
-  ENDLINE = "------------                 ------------"
+  TOPLINE = "LLLLLLLLLLLL                 LLLLLLLLLLLL"
+  ENDLINE = "TTTTTTTTTTTT                 TTTTTTTTTTTT"
   INFIELD = "|                                       |"
   KEEPER  = '======='
   BALL  = 'o'
