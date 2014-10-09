@@ -12,62 +12,34 @@ class Field < BaseField
     @p2_keeper = { pos: 17 }
     @p1_keeper = { pos: 17 }
     @ball_vector = first_vector
-    @move = {
-      ball: {x: 0, y: 0},
-      p1_keeper: 0,
-      p2_keeper: 0
-    }
+    @event = []
   end
 
   def update(p1, p2)
-    reset_pos
-    set_move(p1, p2)
-    move_pos
+    act_ball
+    act_keeper_p1(p1['key'])
+    act_keeper_p2(p2['key'])
   end
 
   def reverse
-    reset_pos
-    move_pos_reverse
-    self
+    reversed = self.class.new
+    reversed.ball[:x] = (WIDTH - 1) - self.ball[:x]
+    reversed.ball[:y] = HEIGHT - self.ball[:x]
+    reversed.p1_keeper[:pos] = (KEEPER_MAX_POS + 1) - self.p2_keeper[:pos]
+    reversed.p2_keeper[:pos] = (KEEPER_MAX_POS + 1) - self.p1_keeper[:pos]
+    reversed
   end
 
   def to_json
     {
       ball: @ball,
       p1_keeper: @p1_keeper,
-      p2_keeper: @p2_keeper
+      p2_keeper: @p2_keeper,
+      event: @event.flatten
     }.to_json
   end
 
   private
-
-  def reset_pos
-    init_instance = self.class.new
-    @ball[:x] = init_instance.ball[:x]
-    @ball[:y] = init_instance.ball[:y]
-    @p1_keeper = init_instance.p1_keeper
-    @p2_keeper = init_instance.p2_keeper
-  end
-
-  def set_move(p1, p2)
-    act_ball
-    act_p1_keeper(p1["key"])
-    act_p2_keeper(p2["key"])
-  end
-
-  def move_pos
-    @ball[:x] += @move[:ball][:x]
-    @ball[:y] += @move[:ball][:y]
-    @p1_keeper[:pos] += @move[:p1_keeper]
-    @p2_keeper[:pos] += @move[:p2_keeper]
-  end
-
-  def move_pos_reverse
-    @ball[:x] -= @move[:ball][:x]
-    @ball[:y] -= @move[:ball][:y]
-    @p1_keeper[:pos] -= @move[:p2_keeper]
-    @p2_keeper[:pos] -= @move[:p1_keeper]
-  end
 
   def inner?(x, y)
     x.between?(1, WIDTH - 1) && y.between?(1, HEIGHT - 1)
@@ -83,38 +55,54 @@ class Field < BaseField
   end
 
   def act_ball
-    move = {x: @ball_vector[0], y: @ball_vector[1]}
-    moved_x = (@ball[:x] + @move[:ball][:x]) + @ball_vector[0]
-    moved_y = (@ball[:y] + @move[:ball][:y]) + @ball_vector[1]
-    if moved_x == 0 || moved_x == WIDTH - 1
-      @ball_vector[0] = @ball_vector[0] * (-1)
-      move[:x] += @ball_vector[0] * 2
-    end
-    if moved_y == 0 || moved_y == HEIGHT
+    moved = @ball.dup
+    moved[:x] += @ball_vector[0]
+    moved[:y] += @ball_vector[1]
+    ### ぶつかり判定
+    # p1キーパー
+    @event = []
+    @event << if moved[:y] > (HEIGHT - 2) && (@p1_keeper[:pos]..(@p1_keeper[:pos] + KEEPER.size - 1)).include?(moved[:x])
       @ball_vector[1] = @ball_vector[1] * (-1)
-      move[:y] += @ball_vector[1] * 2
+      moved[:y] += @ball_vector[1] * 2
+      :hit_p1
+    # p2キーパー
+    elsif moved[:y] < 2 && (@p2_keeper[:pos]..(@p2_keeper[:pos] + KEEPER.size - 1)).include?(moved[:x])
+      @ball_vector[1] = @ball_vector[1] * (-1)
+      moved[:y] += @ball_vector[1] * 2
+      :hit_p2
+    # 壁
+    else
+      wall_hit_event = []
+      if moved[:x] == 0 || moved[:x] == WIDTH - 1
+        @ball_vector[0] = @ball_vector[0] * (-1)
+        moved[:x] += @ball_vector[0] * 2
+        wall_hit_event << :hit_touchline
+      end
+      if moved[:y] == 0 || moved[:y] == HEIGHT
+        @ball_vector[1] = @ball_vector[1] * (-1)
+        moved[:y] += @ball_vector[1] * 2
+        wall_hit_event << :hit_endline
+      end
+      wall_hit_event
     end
-    @move[:ball][:x] += move[:x]
-    @move[:ball][:y] += move[:y]
+    @ball = moved
   end
 
-  def act_p1_keeper(act)
-    keeper_pos = @p1_keeper[:pos] + @move[:p1_keeper]
+  def act_keeper_p1(act)
     case act
     when 'r'
-      @move[:p1_keeper] += 1 if keeper_pos < KEEPER_MAX_POS
+      @p1_keeper[:pos] += 1 if @p1_keeper[:pos] < KEEPER_MAX_POS
     when 'l'
-      @move[:p1_keeper] += -1 if keeper_pos > 1
+      @p1_keeper[:pos] += -1 if @p1_keeper[:pos] > 1
     end
   end
 
-  def act_p2_keeper(act)
-    keeper_pos = @p2_keeper[:pos] + @move[:p2_keeper]
+  def act_keeper_p2(act)
     case act
     when 'r'
-      @move[:p2_keeper] += -1 if keeper_pos > 1
+      @p2_keeper[:pos] += -1 if @p2_keeper[:pos] > 1
     when 'l'
-      @move[:p2_keeper] += 1 if keeper_pos < KEEPER_MAX_POS
+      @p2_keeper[:pos] += 1 if @p2_keeper[:pos] < KEEPER_MAX_POS
     end
   end
 

@@ -3,7 +3,7 @@ require 'json'
 require_relative '../../common_config/base_field'
 
 class Field < BaseField
-  attr_accessor :ball, :p2_keeper, :p1_keeper
+  attr_accessor :ball, :p2_keeper, :p1_keeper, :event
 
   def initialize
   end
@@ -12,6 +12,7 @@ class Field < BaseField
     @ball = json[:ball]
     @p2_keeper = json[:p2_keeper]
     @p1_keeper = json[:p1_keeper]
+    @event = json[:event] unless json[:event] == []
   end
 
   # @author hasumi
@@ -41,10 +42,11 @@ class Field < BaseField
   # @author hasumi
   # 各要素の位置をデバッグプリントする
   def debug
-    "ball_x : #{@ball[:x]}\n" <<
-    "ball_y : #{@ball[:y]}\n" <<
+    "ball_x    : #{@ball[:x]}\n" <<
+    "ball_y    : #{@ball[:y]}\n" <<
     "p1_keeper : #{@p1_keeper[:pos]}\n" <<
-    "p2_keeper : #{@p2_keeper[:pos]}\n"
+    "p2_keeper : #{@p2_keeper[:pos]}\n" <<
+    "event     : #{@event.to_s}\n"
   end
 
   # @author hasumi
