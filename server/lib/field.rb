@@ -1,4 +1,5 @@
 require 'json'
+require 'pry'
 require_relative '../../common_config/base_field'
 
 class Field < BaseField
@@ -7,7 +8,7 @@ class Field < BaseField
   KEEPER_MAX_POS = WIDTH - KEEPER.size - 1
 
   def initialize
-    @ball = {x: 10, y: 10}
+    @ball = {x: 20, y: 15}
     @p2_keeper = { pos: 17 }
     @p1_keeper = { pos: 17 }
     @ball_vector = first_vector
@@ -18,6 +19,15 @@ class Field < BaseField
     act_ball
     act_keeper_p1(p1['key'])
     act_keeper_p2(p2['key'])
+  end
+
+  def reverse
+    reversed = self.class.new
+    reversed.ball[:x] = (WIDTH - 1) - self.ball[:x]
+    reversed.ball[:y] = HEIGHT - self.ball[:x]
+    reversed.p1_keeper[:pos] = (KEEPER_MAX_POS + 1) - self.p2_keeper[:pos]
+    reversed.p2_keeper[:pos] = (KEEPER_MAX_POS + 1) - self.p1_keeper[:pos]
+    reversed
   end
 
   def to_json
@@ -86,6 +96,7 @@ class Field < BaseField
       @p1_keeper[:pos] += -1 if @p1_keeper[:pos] > 1
     end
   end
+
   def act_keeper_p2(act)
     case act
     when 'r'
@@ -94,4 +105,5 @@ class Field < BaseField
       @p2_keeper[:pos] += 1 if @p2_keeper[:pos] < KEEPER_MAX_POS
     end
   end
+
 end
