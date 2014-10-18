@@ -9,13 +9,13 @@ class Field < BaseField
 
   def initialize
     @score = {p1: 0, p2: 0}
+    @p2_keeper = { pos: 18 }
+    @p1_keeper = { pos: 18 }
     restart
   end
 
   def restart
     @ball = {x: 20, y: 15}
-    @p2_keeper = { pos: 17 }
-    @p1_keeper = { pos: 17 }
     @ball_vector = first_vector
     @event = []
   end
@@ -45,6 +45,12 @@ class Field < BaseField
     elsif events.any?{|e| e == :you_missed }
       events.delete(:you_missed)
       events << :you_got
+    elsif events.any?{|e| e == :you_won }
+      events.delete(:you_won)
+      events << :you_lost
+    elsif events.any?{|e| e == :you_lost }
+      events.delete(:you_lost)
+      events << :you_won
     end
     reversed.score = {p1: @score[:p2], p2: @score[:p1]}
     reversed.event = events
@@ -59,6 +65,10 @@ class Field < BaseField
       event: @event.flatten,
       score: {p1: @score[:p1], p2: @score[:p2]}
     }.to_json
+  end
+
+  def game_over?
+    @score[:p1] >= GAME_OVER_SCORE || @score[:p2] >= GAME_OVER_SCORE
   end
 
   private
@@ -103,7 +113,7 @@ class Field < BaseField
       if moved[:y] == 0
         wall_hit_event << if TOPLINE[moved[:x]] == ' '
           @score[:p1] += 1
-          :you_got
+          game_over? ? :you_won : :you_got
         else
           @ball_vector[1] = @ball_vector[1] * (-1)
           moved[:y] += @ball_vector[1] * 2
@@ -112,7 +122,7 @@ class Field < BaseField
       elsif moved[:y] == HEIGHT
         wall_hit_event << if ENDLINE[moved[:x]] == ' '
           @score[:p2] += 1
-          :you_missed
+          game_over? ? :you_lost : :you_missed
         else
           @ball_vector[1] = @ball_vector[1] * (-1)
           moved[:y] += @ball_vector[1] * 2
