@@ -67,6 +67,14 @@ class Main
 
   def flush
     @field.set_pos JSON.parse(@sock.gets).deep_symbolize_keys
+    if @field.event && (@field.event.include?('you_got') || @field.event.include?('you_missed'))
+      @field.flush
+      @sock.puts 'game_init'
+      @field.event = nil
+      count_down
+      @sock.puts '{}'
+      flush
+    end
     @field.flush
   end
 

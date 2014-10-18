@@ -27,9 +27,7 @@ class Main
         sock2.puts(fields)
         loop do
           p1 = sock1.gets
-          puts "p1 input #{p1}"
           p2 = sock2.gets
-          puts "p2 input #{p2}"
           if connecting?(p1, p2)
             field.update(JSON.parse(p1), JSON.parse(p2))
             sock1.puts field.to_json
