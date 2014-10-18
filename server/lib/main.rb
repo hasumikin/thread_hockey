@@ -8,6 +8,7 @@ class Main
 
   def initialize
     @server = TCPServer.open(PORT)
+    @game_counter = GameCounter.new
     loop do
       game
     end
@@ -17,6 +18,7 @@ class Main
     player1 = @server.accept
     player2 = @server.accept
     Thread.new([player1, player2]) do |sock1, sock2|
+      @game_counter.inc
       puts 'Game Start'
       field = Field.new
       fields = field.to_json
