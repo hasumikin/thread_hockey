@@ -3,7 +3,7 @@ require 'json'
 require_relative '../../common_config/base_field'
 
 class Field < BaseField
-  attr_accessor :ball, :p2_keeper, :p1_keeper, :event
+  attr_accessor :ball, :p2_keeper, :p1_keeper, :event, :score
 
   def initialize
   end
@@ -13,6 +13,7 @@ class Field < BaseField
     @p2_keeper = json[:p2_keeper]
     @p1_keeper = json[:p1_keeper]
     @event = json[:event] unless json[:event] == []
+    @score = json[:score] if json[:score]
   end
 
   # @author hasumi
@@ -46,7 +47,8 @@ class Field < BaseField
     "ball_y    : #{@ball[:y]}\n" <<
     "p1_keeper : #{@p1_keeper[:pos]}\n" <<
     "p2_keeper : #{@p2_keeper[:pos]}\n" <<
-    "event     : #{@event.to_s}\n"
+    "event     : #{@event.to_s}\n" <<
+    "score     : #{@score.to_s}\n"
   end
 
   # @author hasumi

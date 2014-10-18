@@ -3,11 +3,16 @@ require 'pry'
 require_relative '../../common_config/base_field'
 
 class Field < BaseField
-  attr_accessor :ball, :p2_keeper, :p1_keeper, :event
+  attr_accessor :ball, :p2_keeper, :p1_keeper, :event, :score
 
   KEEPER_MAX_POS = WIDTH - KEEPER.size - 1
 
   def initialize
+    @score = {p1: 0, p2: 0}
+    restart
+  end
+
+  def restart
     @ball = {x: 20, y: 15}
     @p2_keeper = { pos: 17 }
     @p1_keeper = { pos: 17 }
@@ -28,14 +33,20 @@ class Field < BaseField
     reversed.p1_keeper[:pos] = (KEEPER_MAX_POS + 1) - self.p2_keeper[:pos]
     reversed.p2_keeper[:pos] = (KEEPER_MAX_POS + 1) - self.p1_keeper[:pos]
     events = self.event.dup.flatten
-        #binding.pry
-    if events.any?{|e| e == :hit_p1 }#(:hit_p1)
+    if events.any?{|e| e == :hit_p1 }
       events.delete(:hit_p1)
       events << :hit_p2
     elsif events.any?{|e| e == :hit_p2 }
       events.delete(:hit_p2)
       events << :hit_p1
+    elsif events.any?{|e| e == :you_got }
+      events.delete(:you_got)
+      events << :you_missed
+    elsif events.any?{|e| e == :you_missed }
+      events.delete(:you_missed)
+      events << :you_got
     end
+    reversed.score = {p1: @score[:p2], p2: @score[:p1]}
     reversed.event = events
     reversed
   end
@@ -45,7 +56,8 @@ class Field < BaseField
       ball: @ball,
       p1_keeper: @p1_keeper,
       p2_keeper: @p2_keeper,
-      event: @event.flatten
+      event: @event.flatten,
+      score: {p1: @score[:p1], p2: @score[:p2]}
     }.to_json
   end
 
@@ -88,10 +100,24 @@ class Field < BaseField
         moved[:x] += @ball_vector[0] * 2
         wall_hit_event << :hit_touchline
       end
-      if moved[:y] == 0 || moved[:y] == HEIGHT
-        @ball_vector[1] = @ball_vector[1] * (-1)
-        moved[:y] += @ball_vector[1] * 2
-        wall_hit_event << :hit_endline
+      if moved[:y] == 0
+        wall_hit_event << if TOPLINE[moved[:x]] == ' '
+          @score[:p1] += 1
+          :you_got
+        else
+          @ball_vector[1] = @ball_vector[1] * (-1)
+          moved[:y] += @ball_vector[1] * 2
+          :hit_topline
+        end
+      elsif moved[:y] == HEIGHT
+        wall_hit_event << if ENDLINE[moved[:x]] == ' '
+          @score[:p2] += 1
+          :you_missed
+        else
+          @ball_vector[1] = @ball_vector[1] * (-1)
+          moved[:y] += @ball_vector[1] * 2
+          :hit_endline
+        end
       end
       wall_hit_event
     end
