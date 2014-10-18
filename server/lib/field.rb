@@ -3,19 +3,19 @@ require 'pry'
 require_relative '../../common_config/base_field'
 
 class Field < BaseField
-  attr_accessor :ball, :p2_keeper, :p1_keeper, :event, :score
+  attr_accessor :ball, :p1_keeper, :p2_keeper, :event, :score
 
   KEEPER_MAX_POS = WIDTH - KEEPER.size - 1
 
   def initialize
     @score = {p1: 0, p2: 0}
-    @p2_keeper = { pos: 18 }
-    @p1_keeper = { pos: 18 }
+    @p1_keeper = Keeper.new(pos: 18)
+    @p2_keeper = Keeper.new(pos: 18)
     restart
   end
 
   def restart
-    @ball = {x: 20, y: 15}
+    @ball = {x: rand(1..(WIDTH-1)), y: rand(((HEIGHT/3).round-1)..((HEIGHT/3*2).round-1))}
     @ball_vector = first_vector
     @event = []
   end
@@ -30,8 +30,8 @@ class Field < BaseField
     reversed = self.class.new
     reversed.ball[:x] = (WIDTH - 1) - self.ball[:x]
     reversed.ball[:y] = HEIGHT - self.ball[:y]
-    reversed.p1_keeper[:pos] = (KEEPER_MAX_POS + 1) - self.p2_keeper[:pos]
-    reversed.p2_keeper[:pos] = (KEEPER_MAX_POS + 1) - self.p1_keeper[:pos]
+    reversed.p1_keeper.pos = (KEEPER_MAX_POS + 1) - self.p2_keeper.pos
+    reversed.p2_keeper.pos = (KEEPER_MAX_POS + 1) - self.p1_keeper.pos
     events = self.event.dup.flatten
     if events.any?{|e| e == :hit_p1 }
       events.delete(:hit_p1)
@@ -54,8 +54,8 @@ class Field < BaseField
   def to_json
     {
       ball: @ball,
-      p1_keeper: @p1_keeper,
-      p2_keeper: @p2_keeper,
+      p1_keeper: {pos: @p1_keeper.pos},
+      p2_keeper: {pos: @p2_keeper.pos},
       event: @event.flatten,
       score: {p1: @score[:p1], p2: @score[:p2]}
     }.to_json
@@ -87,12 +87,12 @@ class Field < BaseField
     ### ぶつかり判定
     # p1キーパー
     @event = []
-    @event << if moved[:y] > (HEIGHT - 2) && (@p1_keeper[:pos]..(@p1_keeper[:pos] + KEEPER.size - 1)).include?(moved[:x])
+    @event << if moved[:y] > (HEIGHT - 2) && (@p1_keeper.pos..(@p1_keeper.pos + KEEPER.size - 1)).include?(moved[:x])
       @ball_vector[1] = @ball_vector[1] * (-1)
       moved[:y] += @ball_vector[1] * 2
       :hit_p1
     # p2キーパー
-    elsif moved[:y] < 2 && (@p2_keeper[:pos]..(@p2_keeper[:pos] + KEEPER.size - 1)).include?(moved[:x])
+    elsif moved[:y] < 2 && (@p2_keeper.pos..(@p2_keeper.pos + KEEPER.size - 1)).include?(moved[:x])
       @ball_vector[1] = @ball_vector[1] * (-1)
       moved[:y] += @ball_vector[1] * 2
       :hit_p2
@@ -131,18 +131,18 @@ class Field < BaseField
   def act_keeper_p1(act)
     case act
     when 'r'
-      @p1_keeper[:pos] += 1 if @p1_keeper[:pos] < KEEPER_MAX_POS
+      @p1_keeper.pos += 1 if @p1_keeper.pos < KEEPER_MAX_POS
     when 'l'
-      @p1_keeper[:pos] += -1 if @p1_keeper[:pos] > 1
+      @p1_keeper.pos += -1 if @p1_keeper.pos > 1
     end
   end
 
   def act_keeper_p2(act)
     case act
     when 'r'
-      @p2_keeper[:pos] += -1 if @p2_keeper[:pos] > 1
+      @p2_keeper.pos += -1 if @p2_keeper.pos > 1
     when 'l'
-      @p2_keeper[:pos] += 1 if @p2_keeper[:pos] < KEEPER_MAX_POS
+      @p2_keeper.pos += 1 if @p2_keeper.pos < KEEPER_MAX_POS
     end
   end
 
