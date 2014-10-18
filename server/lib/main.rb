@@ -28,6 +28,10 @@ class Main
         loop do
           p1 = sock1.gets
           p2 = sock2.gets
+          if p1.include?('game_init') || p2.include?('game_init')
+            field.restart
+            next
+          end
           if connecting?(p1, p2)
             field.update(JSON.parse(p1), JSON.parse(p2))
             sock1.puts field.to_json
