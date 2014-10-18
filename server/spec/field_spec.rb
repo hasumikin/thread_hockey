@@ -116,5 +116,29 @@ describe Field do
     end
   end
 
+  describe "#reverse" do
+    #let(:field_ball) { @field.ball }
+    #subject { @field.reverse.ball }
+    context "p1側のボール位置が(1,1)" do
+      before { @field.ball = {x: 1, y: 1} }
+      subject { @field.reverse.ball }
+      it { expect(subject).to eq({x: 39, y: 29}) }
+    end
+    context "p1側のボール位置が(39,1)" do
+      before { @field.ball = {x: 39, y: 1} }
+      subject { @field.reverse.ball }
+      it { expect(subject).to eq({x: 1, y: 29}) }
+    end
+    context "p1側のボール位置が(1,29)" do
+      before { @field.ball = {x: 1, y: 29} }
+      subject { @field.reverse.ball }
+      it { expect(subject).to eq({x: 39, y: 1}) }
+    end
+    context "p1側のボール位置が(39,29)" do
+      before { @field.ball = {x: 39, y: 29} }
+      subject { @field.reverse.ball }
+      it { expect(subject).to eq({x: 1, y: 1}) }
+    end
+  end
 end
 
