@@ -61,7 +61,7 @@ class Main
       end
       @sock.puts request
       flush
-      sleep 0.1
+      sleep 0.05
     end
   end
 
