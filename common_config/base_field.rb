@@ -8,4 +8,5 @@ class BaseField
   HEIGHT = 30
   WIDTH = ENDLINE.length
   GAME_OVER_SCORE = 3
+  MAX_GAME_COUNT = 3
 end
