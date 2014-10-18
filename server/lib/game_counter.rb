@@ -11,12 +11,14 @@ class GameCounter
   def inc
     @mutex.synchronize do
       @pair = self.pair + 1
+      puts "######## @game_counter #{@pair}"
     end
   end
 
   def dec
     @mutex.synchronize do
       @pair = self.pair - 1
+      puts "######## @game_counter #{@pair}"
     end
   end
 end

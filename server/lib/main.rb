@@ -19,21 +19,38 @@ class Main
     player2 = @server.accept
     Thread.new([player1, player2]) do |sock1, sock2|
       @game_counter.inc
-      puts 'Game Start'
-      field = Field.new
-      fields = field.to_json
-      sock1.puts(fields)
-      sock2.puts(fields)
-      loop do
-        p1 = sock1.gets
-        puts "p1 input #{p1}"
-        p2 = sock2.gets
-        puts "p2 input #{p2}"
-        field.update(JSON.parse(p1), JSON.parse(p2))
-        sock1.puts field.to_json
-        sock2.puts field.reverse.to_json
+      begin
+        puts 'Game Start'
+        field = Field.new
+        fields = field.to_json
+        sock1.puts(fields)
+        sock2.puts(fields)
+        loop do
+          p1 = sock1.gets
+          puts "p1 input #{p1}"
+          p2 = sock2.gets
+          puts "p2 input #{p2}"
+          if connecting?(p1, p2)
+            field.update(JSON.parse(p1), JSON.parse(p2))
+            sock1.puts field.to_json
+            sock2.puts field.reverse.to_json
+          else
+            break
+          end
+        end
+      ensure
+        sock1.close
+        sock2.close
+        @game_counter.dec
       end
     end
   end
+
+  private
+
+  def connecting?(p1, p2)
+    p1 && p2
+  end
+
 
 end
