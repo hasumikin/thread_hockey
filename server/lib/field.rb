@@ -3,7 +3,7 @@ require 'pry'
 require_relative '../../common_config/base_field'
 
 class Field < BaseField
-  attr_accessor :ball, :p2_keeper, :p1_keeper
+  attr_accessor :ball, :p2_keeper, :p1_keeper, :event
 
   KEEPER_MAX_POS = WIDTH - KEEPER.size - 1
 
@@ -24,9 +24,19 @@ class Field < BaseField
   def reverse
     reversed = self.class.new
     reversed.ball[:x] = (WIDTH - 1) - self.ball[:x]
-    reversed.ball[:y] = HEIGHT - self.ball[:x]
+    reversed.ball[:y] = HEIGHT - self.ball[:y]
     reversed.p1_keeper[:pos] = (KEEPER_MAX_POS + 1) - self.p2_keeper[:pos]
     reversed.p2_keeper[:pos] = (KEEPER_MAX_POS + 1) - self.p1_keeper[:pos]
+    events = self.event.dup.flatten
+        #binding.pry
+    if events.any?{|e| e == :hit_p1 }#(:hit_p1)
+      events.delete(:hit_p1)
+      events << :hit_p2
+    elsif events.any?{|e| e == :hit_p2 }
+      events.delete(:hit_p2)
+      events << :hit_p1
+    end
+    reversed.event = events
     reversed
   end
 
