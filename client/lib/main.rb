@@ -34,6 +34,51 @@ class Main
      '         ',
      '         ']]
 
+  WINNER = [
+    [' WW          WW ',
+     '  WW   WW   WW  ',
+     '  WW  W  W WW   ',
+     '   WW W  W W    ',
+     '    WW   WWW    '],
+    ['     IIIIII     ',
+     '       II       ',
+     '       II       ',
+     '       II       ',
+     '     IIIIII     '],
+    ['NN            NN',
+     'NNNNN         NN',
+     'NN  NNNN      NN',
+     'NN    NNNN    NN',
+     'NN      NNNN  NN'],
+  ]
+
+  LOSSER = [
+    ['   LLL          ',
+     '   LLL          ',
+     '   LLL          ',
+     '   LLL          ',
+     '   LLL          ',
+     '   LLLLLLLLLLL  '],
+    ['   ooooooooooo  ',
+     '   oo       oo  ',
+     '   oo       oo  ',
+     '   oo       oo  ',
+     '   oo       oo  ',
+     '   ooooooooooo  '],
+    ['   SSSSSSSSSSS  ',
+     '   SSS          ',
+     '   SSSS         ',
+     '   SSSSSSSSSS   ',
+     '            SS  ',
+     '   SSSSSSSSSSSS '],
+    ['   EEEEEEEEEEE  ',
+     '   EEE          ',
+     '   EEEEEEEEEEE  ',
+     '   EEE          ',
+     '   EEE          ',
+     '   EEEEEEEEEEE  '],
+  ]
+
   def initialize(host='localhost')
     Curses.init_screen
     Curses.cbreak
@@ -75,6 +120,12 @@ class Main
       @sock.puts '{}'
       flush
     end
+    if @field.event && @field.event.include?('you_won')
+      game_over(WINNER)
+    elsif @field.event && @field.event.include?('you_lost')
+      game_over(LOSSER)
+    end
+
     @field.flush
   end
 
@@ -91,6 +142,20 @@ class Main
       end
       Curses.refresh
       sleep 1
+    end
+  end
+
+  def game_over(result)
+    result.each do |finisher|
+      Curses.setpos((Field::HEIGHT / 2).floor - (result[0].size / 2).floor + 4, 0)
+      finisher.each do |split_finisher|
+        line = Field::INFIELD.dup
+        pos = (Field::WIDTH / 2).floor - (split_finisher.size / 2).floor
+        line[(pos)..(pos + split_finisher.size - 1)] = split_finisher
+        Curses.addstr "#{line}\n"
+      end
+      Curses.refresh
+      sleep 0.5
     end
   end
 

@@ -45,6 +45,12 @@ class Field < BaseField
     elsif events.any?{|e| e == :you_missed }
       events.delete(:you_missed)
       events << :you_got
+    elsif events.any?{|e| e == :you_won }
+      events.delete(:you_won)
+      events << :you_lost
+    elsif events.any?{|e| e == :you_lost }
+      events.delete(:you_lost)
+      events << :you_won
     end
     reversed.score = {p1: @score[:p2], p2: @score[:p1]}
     reversed.event = events
